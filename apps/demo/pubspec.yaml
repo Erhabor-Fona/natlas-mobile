@@ -1,0 +1,27 @@
+name: natlas_demo
+description: Voice chatbot demo for the N-ATLaS Mobile SDK.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+  # 3.35+ for DropdownButtonFormField.initialValue (replaced `value`).
+  flutter: ">=3.35.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  natlas_flutter:
+    path: ../../packages/flutter
+  record: ^5.1.2
+  permission_handler: ^11.3.1
+  path_provider: ^2.1.4
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

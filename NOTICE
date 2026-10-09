@@ -1,0 +1,39 @@
+N-ATLaS Mobile SDK — Third-Party Notices
+=========================================
+
+This repository's CODE is licensed under the Apache License 2.0.
+The N-ATLaS models it connects to are NOT Apache-2.0 — see below.
+
+── Required attribution (include in all public deployments) ──────────────────
+
+  "N-ATLaS is an initiative of the Federal Ministry of Communications,
+  Innovation and Digital Economy, and powered by Awarri Technologies."
+
+── N-ATLaS Model License Summary ────────────────────────────────────────────
+
+Models: NCAIR1/N-ATLaS · NCAIR1/Hausa-ASR · NCAIR1/Igbo-ASR
+        NCAIR1/Yoruba-ASR · NCAIR1/NigerianAccentedEnglish
+
+License: Open-Source Research and Innovation License (Awarri / FMCIDE)
+         Effective date: September 2025
+
+Key terms:
+  • Attribution mandatory (text above)
+  • Share-alike on model derivatives
+  • Cap of 1,000 active end-users per rolling 30-day period
+    (commercial licence required above this threshold — contact Awarri)
+  • Not for enterprise or commercial deployment without a separate licence
+  • Prohibited: surveillance, discriminatory profiling, disinformation,
+    impersonation, military or weaponised deployment
+  • Renamed derivatives must carry the suffix "Powered by Awarri"
+  • Governing law: Federal Republic of Nigeria
+
+Authoritative text: the Terms of Use section on each Hugging Face model card.
+Contact for licensing: datasupport@awarri.com · awarri.com
+
+── This Repository ───────────────────────────────────────────────────────────
+
+N-ATLaS Mobile SDK is an independent, community-built client toolkit.
+It ships no model weights and is not a derivative work of any N-ATLaS model.
+
+Built by Erhabor Fona · github.com/Erhabor-Fona/natlas-mobile

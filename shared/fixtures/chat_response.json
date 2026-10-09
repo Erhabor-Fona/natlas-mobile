@@ -1,0 +1,17 @@
+{
+  "id": "chatcmpl-8f2a1c4e9b7d4e0a",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Sannu da zuwa! Ina farin cikin taimaka maka. Me kake son sani?"
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 42,
+    "completion_tokens": 18
+  }
+}

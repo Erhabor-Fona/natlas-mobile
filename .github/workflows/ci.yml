@@ -1,0 +1,179 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Flutter SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: packages/flutter
+        run: flutter pub get
+
+      - name: Verify formatting
+        working-directory: packages/flutter
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        working-directory: packages/flutter
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        working-directory: packages/flutter
+        run: flutter test
+
+      - name: Dry-run publish
+        working-directory: packages/flutter
+        run: flutter pub publish --dry-run
+
+  demo:
+    name: Demo app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate platform scaffolding
+        # The android/ and ios/ directories are gitignored — they are
+        # generated, so CI recreates them before building.
+        working-directory: apps/demo
+        run: flutter create --platforms=android --project-name natlas_demo .
+
+      - name: Install dependencies
+        working-directory: apps/demo
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: apps/demo
+        run: flutter analyze
+
+      - name: Build APK
+        working-directory: apps/demo
+        run: flutter build apk --debug
+
+  go:
+    name: Go SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          # No go.sum — the SDK has no dependencies outside the stdlib.
+          cache: false
+
+      - name: Verify formatting
+        working-directory: packages/go
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        working-directory: packages/go
+        run: go vet ./...
+
+      - name: Build
+        working-directory: packages/go
+        run: go build ./...
+
+      - name: Test
+        working-directory: packages/go
+        run: go test -race -v ./...
+
+  rust:
+    name: Rust crate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/rust
+
+      - name: Verify formatting
+        working-directory: packages/rust
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: packages/rust
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        working-directory: packages/rust
+        run: cargo test --all-targets
+
+      - name: Doc tests
+        working-directory: packages/rust
+        run: cargo test --doc
+
+      - name: Dry-run publish
+        working-directory: packages/rust
+        run: cargo publish --dry-run
+
+  gateway:
+    name: Gateway
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint
+        working-directory: serve
+        run: ruff check .
+
+      - name: Syntax check
+        working-directory: serve
+        run: python -m compileall -q gateway.py app.py modal_app.py
+
+  fixtures:
+    name: Shared fixtures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON fixtures
+        run: |
+          for f in shared/fixtures/*.json; do
+            python -c "import json,sys; json.load(open('$f'))" \
+              || { echo "Invalid JSON: $f"; exit 1; }
+            echo "ok $f"
+          done
+
+      - name: Check the SSE fixture ends with the DONE sentinel
+        run: |
+          grep -q '^data: \[DONE\]$' shared/fixtures/chat_stream.txt

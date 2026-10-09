@@ -1,0 +1,18 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+ignore = [
+    # FastAPI's dependency-injection idiom is a function call in the default:
+    # `file: UploadFile = File(...)`. Correct here, flagged by flake8-bugbear.
+    "B008",
+    # date.today() is fine — the Llama-3 chat template wants a local date
+    # string, not a timezone-aware datetime.
+    "DTZ011",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Modal decorators reference names that only resolve inside the container.
+"modal_app.py" = ["E402"]

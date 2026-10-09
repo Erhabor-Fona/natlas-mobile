@@ -1,0 +1,13 @@
+{
+  "status": "ok",
+  "models": {
+    "llm": "NCAIR1/N-ATLaS",
+    "asr": [
+      "NCAIR1/Hausa-ASR",
+      "NCAIR1/Igbo-ASR",
+      "NCAIR1/Yoruba-ASR",
+      "NCAIR1/NigerianAccentedEnglish"
+    ]
+  },
+  "timestamp": 1760000000
+}

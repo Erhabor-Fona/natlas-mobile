@@ -1,0 +1,34 @@
+name: natlas-gateway
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      HF_TOKEN: ${HF_TOKEN:?set HF_TOKEN in .env}
+      NATLAS_API_KEY: ${NATLAS_API_KEY:?set NATLAS_API_KEY in .env}
+      HF_HOME: /model-cache
+    volumes:
+      # Weights are ~16 GB — a named volume keeps the download a one-time cost.
+      - model-cache:/model-cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      # Five models have to load onto the GPU before /health answers.
+      start_period: 15m
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  model-cache:

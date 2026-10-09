@@ -1,0 +1,10 @@
+data: {"id":"chatcmpl-8f2a1c4e9b7d4e0a","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Sannu"}}]}
+
+data: {"id":"chatcmpl-8f2a1c4e9b7d4e0a","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" da"}}]}
+
+data: {"id":"chatcmpl-8f2a1c4e9b7d4e0a","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" zuwa"}}]}
+
+data: {"id":"chatcmpl-8f2a1c4e9b7d4e0a","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"!"}}]}
+
+data: [DONE]
+

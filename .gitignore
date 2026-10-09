@@ -1,0 +1,52 @@
+# ── Secrets ──────────────────────────────────────────────────────────────────
+.env
+.env.local
+*.pem
+*.key
+
+# ── Rust ─────────────────────────────────────────────────────────────────────
+target/
+Cargo.lock
+
+# ── Dart / Flutter ───────────────────────────────────────────────────────────
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+*.iml
+
+# Generated platform directories in the demo app — regenerate with
+# `flutter create --platforms=android,ios .`
+apps/demo/android/
+apps/demo/ios/
+apps/demo/linux/
+apps/demo/macos/
+apps/demo/windows/
+apps/demo/web/
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ruff_cache/
+*.egg-info/
+
+# ── Modal ────────────────────────────────────────────────────────────────────
+.modal/
+
+# ── Editors / OS ─────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Local model weights (never commit — these are gated and huge) ────────────
+model-cache/
+*.safetensors
+*.bin
+*.gguf

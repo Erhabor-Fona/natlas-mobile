@@ -10,7 +10,14 @@ Audio helpers live here too, since the ffmpeg conversion and 28-second chunking
 are identical either way.
 """
 
-from __future__ import annotations
+# NOTE: deliberately no `from __future__ import annotations` here.
+# It stringifies annotations, and FastAPI resolves them with get_type_hints(),
+# which only sees MODULE globals. The FastAPI types (Request, UploadFile, File,
+# Form) are imported inside build_api(), so they would be unresolvable and
+# FastAPI would silently treat `request: Request` as a query parameter --
+# every POST then fails with:
+#   422 {"loc":["query","request"],"msg":"Field required"}
+# Python 3.10+ evaluates `str | None` natively, so nothing here needs it.
 
 import hashlib
 import hmac
@@ -337,7 +344,8 @@ def load_models(cache_dir: str, hf_token: str, api_key: str):
         model=llm_local,
         dtype="bfloat16",
         max_model_len=MAX_MODEL_LEN,
-        gpu_memory_utilization=0.6,   # leave room for the four ASR models
+        # Weights alone are 15 GiB; below ~0.75 the engine will not start.
+        gpu_memory_utilization=0.84,
         trust_remote_code=False,
     )
     service.llm = AsyncLLMEngine.from_engine_args(engine_args)
@@ -348,6 +356,8 @@ def load_models(cache_dir: str, hf_token: str, api_key: str):
 
     # ── ASR pipelines ─────────────────────────────────────────────────────────
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    # fp16 halves each Whisper Small from ~1 GiB to ~0.45 GiB.
+    asr_dtype = torch.float16 if device == "cuda" else torch.float32
     service.asr = {}
     for lang_code, repo in ASR_REPOS.items():
         local_dir = f"{cache_dir}/asr-{lang_code}"
@@ -357,6 +367,7 @@ def load_models(cache_dir: str, hf_token: str, api_key: str):
             "automatic-speech-recognition",
             model=local_dir,
             device=device,
+            dtype=asr_dtype,  # `torch_dtype` is deprecated in transformers 5.x
         )
 
     service.api_key = api_key

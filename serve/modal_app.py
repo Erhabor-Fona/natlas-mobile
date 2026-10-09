@@ -45,6 +45,17 @@ BASE_IMAGE = (
         "soundfile>=0.12",   # reads the WAV chunks into numpy for the ASR pipe
         "numpy>=1.26",
     )
+    .env(
+        {
+            # vLLM 0.31 defaults to FlashInfer for top-p/top-k sampling, which
+            # JIT-compiles its kernels and so needs nvcc. debian_slim has no
+            # CUDA toolkit, so engine startup dies with:
+            #   RuntimeError: Could not find nvcc and default
+            #   cuda_home='/usr/local/cuda' doesn't exist
+            # The PyTorch-native sampler needs no compiler.
+            "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        }
+    )
     # Ship the shared gateway module into the image.
     .add_local_python_source("gateway")
 )

@@ -18,6 +18,8 @@ class NAtlasStreamText extends StatefulWidget {
   /// The chunk stream from [NAtlasClient.chatStream].
   final Stream<ChatStreamChunk> stream;
 
+  /// Text style for the streamed reply. Falls back to the ambient
+  /// [DefaultTextStyle] when null.
   final TextStyle? style;
 
   /// Show a blinking cursor while streaming.
@@ -29,6 +31,10 @@ class NAtlasStreamText extends StatefulWidget {
   /// Called if the stream emits an error.
   final void Function(Object error)? onError;
 
+  /// Creates a widget that renders [stream] as it arrives.
+  ///
+  /// Subscribes in `initState`, so give it a [Key] tied to the message being
+  /// streamed — otherwise a rebuild with a new stream will not resubscribe.
   const NAtlasStreamText({
     super.key,
     required this.stream,

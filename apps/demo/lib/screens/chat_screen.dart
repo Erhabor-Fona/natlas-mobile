@@ -146,24 +146,37 @@ class _ChatScreenState extends State<ChatScreen> {
       _busy = true;
     });
 
-    final Uint8List? audio = await _recorder.stop();
-    if (audio == null || audio.isEmpty) {
+    // stop() throws a StateError naming the step that failed, which is far
+    // more useful than a blanket "Nothing recorded".
+    final Uint8List audio;
+    try {
+      audio = await _recorder.stop();
+    } on StateError catch (e) {
       setState(() => _busy = false);
-      _showSnack('Nothing recorded');
+      _showSnack(e.message);
       return;
     }
 
     // Transcribe first so the user sees what was heard before the reply starts.
     TranscriptionResult transcription;
     try {
+      debugPrint('[natlas] uploading ${audio.length} bytes '
+          'as recording.${AudioRecorderService.fileExtension}');
       transcription = await _client.transcribe(
         audio: audio,
         language: _language,
-        filename: 'recording.ogg',
+        filename: 'recording.${AudioRecorderService.fileExtension}',
       );
     } on NAtlasException catch (e) {
       setState(() => _busy = false);
-      _showSnack('Transcription failed: ${e.message}');
+      // e.detail carries the gateway's explanation — for a 422 that is the
+      // tail of ffmpeg's stderr, which is the only thing that says WHY the
+      // conversion failed. Showing only e.message hides it.
+      debugPrint('[natlas] transcription failed: $e');
+      _showSnack(
+        '${e.message}: ${(e.detail ?? '').trim()}',
+        duration: const Duration(seconds: 10),
+      );
       return;
     }
 
@@ -231,10 +244,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _showSnack(String message) {
+  void _showSnack(String message, {Duration? duration}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: duration ?? const Duration(seconds: 4),
+      ),
+    );
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -248,8 +265,36 @@ class _ChatScreenState extends State<ChatScreen> {
           LanguagePicker(
             value: _language,
             onChanged: (lang) async {
-              setState(() => widget.settings.language = lang);
+              if (lang == _language) return;
+              final hadConversation = _turns.isNotEmpty;
+
+              // Resolve the messenger BEFORE the await. Looking it up from
+              // `context` afterwards is a use across an async gap, and the
+              // State's `mounted` flag does not guard it — `context` here is
+              // build()'s parameter, which shadows State.context.
+              final messenger = ScaffoldMessenger.of(context);
+
+              // The conversation history is sent with every request, and the
+              // model follows the language it can SEE far more strongly than
+              // the language named in the system prompt. Carrying ten Yoruba
+              // turns into an Igbo request gets you Yoruba back. Each language
+              // therefore starts a fresh conversation.
+              setState(() {
+                widget.settings.language = lang;
+                _turns.clear();
+              });
               await widget.settings.save();
+
+              if (hadConversation) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Switched to ${lang.displayName} — started a new conversation',
+                    ),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
             },
           ),
           IconButton(
@@ -394,9 +439,20 @@ class _Composer extends StatelessWidget {
             top: BorderSide(color: theme.dividerColor.withAlpha(80)),
           ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
+            // Phone keyboards cannot type Yoruba or Igbo diacritics, and tone
+            // is semantic in both — N-ATLaS answers noticeably better on
+            // marked input. Renders nothing for Nigerian English.
+            if (!busy && !recording)
+              NAtlasDiacriticBar(
+                controller: controller,
+                language: language,
+              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
             Expanded(
               child: TextField(
                 controller: controller,
@@ -432,6 +488,8 @@ class _Composer extends StatelessWidget {
               onPressed: busy || recording ? null : onSend,
               icon: const Icon(Icons.send_rounded),
               tooltip: 'Send',
+            ),
+              ],
             ),
           ],
         ),

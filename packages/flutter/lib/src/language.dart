@@ -1,13 +1,21 @@
 /// Supported languages in N-ATLaS.
 enum NAtlasLanguage {
+  /// Hausa — gateway code `ha`.
   hausa('ha'),
+
+  /// Igbo — gateway code `ig`.
   igbo('ig'),
+
+  /// Yorùbá — gateway code `yo`.
   yoruba('yo'),
+
+  /// Nigerian English — gateway code `en`.
   english('en');
 
   /// The BCP-47 / gateway language code.
   final String code;
 
+  /// Binds each value to its gateway language [code].
   const NAtlasLanguage(this.code);
 
   /// Human-readable display name.

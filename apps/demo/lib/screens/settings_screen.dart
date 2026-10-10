@@ -60,7 +60,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final client = NAtlasClient(
       baseUrl: _baseUrl.text.trim(),
       apiKey: _apiKey.text.trim(),
-      timeout: const Duration(seconds: 30),
+      // A cold Modal container takes ~100 s to load five models onto the GPU.
+      // 30 s here reported failure on a perfectly healthy gateway.
+      timeout: const Duration(minutes: 3),
     );
 
     try {

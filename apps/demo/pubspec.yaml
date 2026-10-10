@@ -13,8 +13,11 @@ dependencies:
     sdk: flutter
   natlas_flutter:
     path: ../../packages/flutter
-  record: ^5.1.2
-  permission_handler: ^11.3.1
+  # 7.x — the 5.x line resolves to record_linux 0.7.2, which does not implement
+  # record_platform_interface 1.6.0 (missing startStream, wrong hasPermission
+  # signature). Dart compiles every federated plugin for the kernel snapshot,
+  # so that stale Linux package breaks iOS and Android builds too.
+  record: ^7.1.1
   path_provider: ^2.1.4
   shared_preferences: ^2.3.2
 

@@ -8,6 +8,8 @@ linter:
     - public_member_api_docs
 
 analyzer:
+  exclude:
+    - build/**
   language:
     strict-casts: true
     strict-raw-types: true

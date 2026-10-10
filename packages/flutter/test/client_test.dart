@@ -126,8 +126,8 @@ void main() {
       final client = NAtlasClient(
         baseUrl: 'https://gateway.test',
         apiKey: 'wrong',
-        httpClient: MockClient((_) async =>
-            http.Response(loadFixture('error_401.json'), 401)),
+        httpClient: MockClient(
+            (_) async => http.Response(loadFixture('error_401.json'), 401)),
       );
 
       expect(

@@ -25,5 +25,6 @@ export 'src/models/message.dart';
 export 'src/models/chat_response.dart';
 export 'src/models/transcription.dart';
 export 'src/models/natlas_error.dart';
+export 'src/widgets/natlas_diacritic_bar.dart';
 export 'src/widgets/natlas_mic_button.dart';
 export 'src/widgets/natlas_stream_text.dart';

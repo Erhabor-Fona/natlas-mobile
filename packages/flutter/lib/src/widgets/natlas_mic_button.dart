@@ -36,6 +36,10 @@ class NAtlasMicButton extends StatefulWidget {
   /// Size of the icon inside the button.
   final double iconSize;
 
+  /// Creates a microphone button.
+  ///
+  /// The widget owns only the recording UI state. Supply [onStartRecording] to
+  /// hook up your recorder, and [onRecordingComplete] to handle the bytes.
   const NAtlasMicButton({
     super.key,
     required this.onRecordingComplete,
@@ -107,8 +111,7 @@ class _NAtlasMicButtonState extends State<NAtlasMicButton>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final idleColor = widget.idleColor ?? theme.colorScheme.primary;
-    final recordingColor =
-        widget.recordingColor ?? theme.colorScheme.error;
+    final recordingColor = widget.recordingColor ?? theme.colorScheme.error;
 
     final color = _recording ? recordingColor : idleColor;
     final icon = _processing
@@ -138,7 +141,12 @@ class _NAtlasMicButtonState extends State<NAtlasMicButton>
             color: color,
             shape: BoxShape.circle,
             boxShadow: _recording
-                ? [BoxShadow(color: color.withAlpha(128), blurRadius: 12, spreadRadius: 4)]
+                ? [
+                    BoxShadow(
+                        color: color.withAlpha(128),
+                        blurRadius: 12,
+                        spreadRadius: 4)
+                  ]
                 : null,
           ),
           child: Center(
@@ -146,7 +154,7 @@ class _NAtlasMicButtonState extends State<NAtlasMicButton>
                 ? SizedBox(
                     width: widget.iconSize * 0.7,
                     height: widget.iconSize * 0.7,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       strokeWidth: 2,
                       color: Colors.white,
                     ),

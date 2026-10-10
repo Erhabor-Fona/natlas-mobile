@@ -6,5 +6,9 @@ linter:
     - prefer_final_locals
 
 analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
   language:
     strict-casts: true

@@ -20,11 +20,25 @@ import 'models/transcription.dart';
 /// );
 /// ```
 class NAtlasClient {
+  /// Base URL of the gateway, with no trailing slash.
   final String baseUrl;
+
+  /// Bearer token presented on every request.
   final String apiKey;
+
   final http.Client _http;
+
+  /// How long to wait before giving up on a request.
+  ///
+  /// The 60-second default suits a warm gateway. A cold Modal container takes
+  /// around 100 seconds to load five models onto the GPU, so raise this if
+  /// your deployment scales to zero.
   final Duration timeout;
 
+  /// Creates a client pointed at [baseUrl].
+  ///
+  /// Pass [httpClient] to supply your own — useful for tests, custom
+  /// transports, or sharing a connection pool. Call [dispose] when done.
   NAtlasClient({
     required this.baseUrl,
     required this.apiKey,
@@ -62,7 +76,8 @@ class NAtlasClient {
         .timeout(timeout);
 
     _checkStatus(response);
-    return ChatResponse.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return ChatResponse.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   // ── Chat (streaming) ─────────────────────────────────────────────────────
@@ -89,8 +104,7 @@ class NAtlasClient {
     });
     request.body = body;
 
-    final streamedResponse =
-        await _http.send(request).timeout(timeout);
+    final streamedResponse = await _http.send(request).timeout(timeout);
 
     if (streamedResponse.statusCode != 200) {
       final errorBody = await streamedResponse.stream.bytesToString();
@@ -146,7 +160,8 @@ class NAtlasClient {
     final responseBody = await streamedResponse.stream.bytesToString();
 
     if (streamedResponse.statusCode != 200) {
-      throw NAtlasException.fromStatus(streamedResponse.statusCode, responseBody);
+      throw NAtlasException.fromStatus(
+          streamedResponse.statusCode, responseBody);
     }
 
     return TranscriptionResult.fromJson(
@@ -192,8 +207,8 @@ class NAtlasClient {
 
   /// Check that the gateway is alive and models are loaded.
   Future<Map<String, dynamic>> health() async {
-    final response =
-        await _http.get(_uri('/health'), headers: {'Accept': 'application/json'}).timeout(timeout);
+    final response = await _http.get(_uri('/health'),
+        headers: {'Accept': 'application/json'}).timeout(timeout);
     _checkStatus(response);
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
